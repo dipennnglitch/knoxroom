@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nexus Party – Watch Together</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Orbitron:wght@500;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <!-- Landing / Room Select Overlay -->
+  <div id="landing" class="overlay">
+    <div class="landing-card">
+      <div class="logo">
+        <i class="fas fa-broadcast-tower"></i>
+        <h1>NEXUS<span>PARTY</span></h1>
+      </div>
+      <p class="tagline">Watch • Chat • Call • Discover</p>
+
+      <div class="tabs">
+        <button class="tab active" data-tab="create">Create Party</button>
+        <button class="tab" data-tab="join">Join Party</button>
+      </div>
+
+      <div id="create-panel" class="panel active">
+        <input type="text" id="username-create" placeholder="Your display name" maxlength="20" />
+        <input type="text" id="room-name" placeholder="Party name (optional)" maxlength="30" />
+        <button id="btn-create" class="primary-btn">
+          <i class="fas fa-plus-circle"></i> Create Room
+        </button>
+      </div>
+
+      <div id="join-panel" class="panel">
+        <input type="text" id="username-join" placeholder="Your display name" maxlength="20" />
+        <input type="text" id="room-code" placeholder="Enter room code" maxlength="8" style="text-transform:uppercase" />
+        <button id="btn-join" class="primary-btn">
+          <i class="fas fa-sign-in-alt"></i> Join Room
+        </button>
+      </div>
+
+      <p class="hint">Works best in modern browsers. Open multiple tabs to test multi-user.</p>
+    </div>
+  </div>
+
+  <!-- Main App -->
+  <div id="app" class="hidden">
+    <!-- Top Bar -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <div class="logo-small">
+          <i class="fas fa-broadcast-tower"></i> NEXUS
+        </div>
+        <span class="room-badge" id="room-display">ROOM</span>
+        <button id="btn-copy-code" class="icon-btn" title="Copy invite code">
+          <i class="fas fa-copy"></i>
+        </button>
+      </div>
+      <div class="topbar-center">
+        <span id="party-name">Watch Party</span>
+      </div>
+      <div class="topbar-right">
+        <button id="btn-toggle-members" class="icon-btn" title="Members">
+          <i class="fas fa-users"></i>
+        </button>
+        <button id="btn-leave" class="icon-btn danger" title="Leave party">
+          <i class="fas fa-sign-out-alt"></i>
+        </button>
+      </div>
+    </header>
+
+    <div class="main-layout">
+      <!-- Left Sidebar (Discord-style) -->
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-section">
+          <h3><i class="fas fa-hashtag"></i> Channels</h3>
+          <div class="channel active" data-channel="watch">
+            <i class="fas fa-tv"></i> watch-party
+          </div>
+          <div class="channel" data-channel="voice">
+            <i class="fas fa-volume-up"></i> voice-lounge
+          </div>
+        </div>
+
+        <div class="sidebar-section members-section">
+          <h3><i class="fas fa-user-friends"></i> Members <span id="member-count">(1)</span></h3>
+          <ul id="member-list"></ul>
+        </div>
+
+        <div class="user-panel">
+          <div class="avatar" id="my-avatar">?</div>
+          <div class="user-info">
+            <span id="my-name">You</span>
+            <span class="status online">Online</span>
+          </div>
+          <button id="btn-settings" class="icon-btn" title="Settings"><i class="fas fa-cog"></i></button>
+        </div>
+      </aside>
+
+      <!-- Center: Video Area -->
+      <main class="video-area">
+        <div class="video-container" id="video-container">
+          <div id="video-placeholder" class="placeholder">
+            <i class="fas fa-film"></i>
+            <h2>Paste a link to start watching</h2>
+            <p>YouTube • Vimeo • Direct MP4 • Twitch • almost any video URL</p>
+          </div>
+          <div id="player-wrapper" class="hidden"></div>
+        </div>
+
+        <!-- Video Controls (Host only mostly) -->
+        <div class="video-controls" id="video-controls">
+          <div class="url-bar">
+            <input type="text" id="video-url" placeholder="Paste YouTube, Vimeo, or any video link here…" />
+            <button id="btn-load-video" class="primary-btn small">
+              <i class="fas fa-play"></i> Load
+            </button>
+          </div>
+          <div class="playback-bar">
+            <button id="btn-playpause" class="ctrl-btn" title="Play/Pause">
+              <i class="fas fa-play"></i>
+            </button>
+            <input type="range" id="seek-bar" min="0" max="100" value="0" step="0.1" />
+            <span id="time-display">0:00 / 0:00</span>
+            <button id="btn-sync" class="ctrl-btn" title="Force Sync Everyone">
+              <i class="fas fa-sync-alt"></i>
+            </button>
+            <button id="btn-fullscreen" class="ctrl-btn" title="Fullscreen">
+              <i class="fas fa-expand"></i>
+            </button>
+          </div>
+          <div class="host-badge" id="host-badge" style="display:none">
+            <i class="fas fa-crown"></i> You are the Host
+          </div>
+        </div>
+      </main>
+
+      <!-- Right Sidebar: Chat -->
+      <aside class="chat-panel" id="chat-panel">
+        <div class="chat-header">
+          <h3><i class="fas fa-comments"></i> Party Chat</h3>
+          <div class="chat-actions">
+            <button id="btn-random-fact" class="icon-btn" title="Drop a random fact">
+              <i class="fas fa-lightbulb"></i>
+            </button>
+            <button id="btn-toggle-chat" class="icon-btn" title="Collapse">
+              <i class="fas fa-chevron-right"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="chat-messages" id="chat-messages"></div>
+
+        <div class="reactions-bar" id="reactions-bar">
+          <button class="react-btn" data-emoji="🔥">🔥</button>
+          <button class="react-btn" data-emoji="😂">😂</button>
+          <button class="react-btn" data-emoji="❤️">❤️</button>
+          <button class="react-btn" data-emoji="👏">👏</button>
+          <button class="react-btn" data-emoji="😮">😮</button>
+          <button class="react-btn" data-emoji="🎉">🎉</button>
+        </div>
+
+        <div class="chat-input-area">
+          <input type="text" id="chat-input" placeholder="Message the party…" maxlength="500" />
+          <button id="btn-send" class="icon-btn primary">
+            <i class="fas fa-paper-plane"></i>
+          </button>
+        </div>
+      </aside>
+    </div>
+
+    <!-- Bottom Voice/Video Controls (Discord-like) -->
+    <footer class="voice-bar">
+      <div class="voice-status">
+        <span id="voice-status-text"><i class="fas fa-microphone-slash"></i> Voice disconnected</span>
+      </div>
+      <div class="voice-controls">
+        <button id="btn-mute" class="voice-btn" title="Mute / Unmute" disabled>
+          <i class="fas fa-microphone"></i>
+        </button>
+        <button id="btn-deafen" class="voice-btn" title="Deafen" disabled>
+          <i class="fas fa-headphones"></i>
+        </button>
+        <button id="btn-video-call" class="voice-btn" title="Toggle Camera" disabled>
+          <i class="fas fa-video"></i>
+        </button>
+        <button id="btn-join-voice" class="voice-btn primary" title="Join Voice">
+          <i class="fas fa-phone"></i> Join Voice
+        </button>
+      </div>
+      <div class="local-preview hidden" id="local-preview">
+        <video id="local-video" autoplay muted playsinline></video>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Toast notifications -->
+  <div id="toast-container"></div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.2/dist/peerjs.min.js"></script>
+  <script src="js/facts.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
